@@ -91,7 +91,7 @@ class SlackMessage extends Hubot.TextMessage {
       const [m, type, link] = result;
       switch (type) {
         case '@':
-          parts.push('@' + text.slice(cursor, result.index), SlackMessage.replaceUser(client, link));
+          parts.push(text.slice(cursor, result.index), SlackMessage.replaceUser(client, link));
           break;
         case '#':
           console.log('# link is not supported yet');
@@ -112,7 +112,7 @@ class SlackMessage extends Hubot.TextMessage {
   static replaceUser(client, id) {
     const user = client.fetchUserById(id);
     if (user) {
-      return `${user.name}`;
+      return `@${user.name}`;
     }
     console.error(`Error getting user info ${id}: ${error.message}`);
     return `<@${id}>`;
