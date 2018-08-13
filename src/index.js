@@ -94,7 +94,7 @@ class SlackMessage extends Hubot.TextMessage {
           parts.push(text.slice(cursor, result.index), SlackMessage.replaceUser(client, link));
           break;
         case '#':
-          console.log('# link is not supported yet');
+          parts.push(text.slice(cursor, result.index), '#' + link);
           break;
         case '!':
           console.log('! link is not supported yet');
