@@ -56,6 +56,12 @@ class SlackMessage extends Hubot.TextMessage {
     let cursor = 0;
     let result = null;
 
+    let messageObject = null;
+    if (typeof (text) === 'object') {
+      messageObject = text;
+      text = messageObject.text;
+    }
+
     while (result = regex.exec(text)) {
       const [m, type, link] = result;
       switch (type) {
@@ -77,7 +83,13 @@ class SlackMessage extends Hubot.TextMessage {
         regex.lastIndex++
       }
     }
-    return text;
+
+    if (messageObject) {
+      messageObject.text = text;
+      return messageObject;
+    } else {
+      return text;
+    }
   }
 
   static deferMessage(client, text) {
@@ -86,6 +98,12 @@ class SlackMessage extends Hubot.TextMessage {
     let cursor = 0;
     let result = null;
     const parts = [];
+
+    let messageObject = null;
+    if (typeof (text) === 'object') {
+      messageObject = text;
+      text = messageObject.text;
+    }
 
     while (result = regex.exec(text)) {
       const [m, type, link] = result;
@@ -105,8 +123,15 @@ class SlackMessage extends Hubot.TextMessage {
         regex.lastIndex++
       }
     }
+
     parts.push(text.slice(cursor));
-    return parts.join('');
+
+    if (messageObject) {
+      messageObject.text = parts.join('');
+      return messageObject;
+    } else {
+      return parts.join('');
+    }
   }
 
   static replaceUser(client, id) {
@@ -213,7 +238,7 @@ class Room extends Hubot.Adapter {
 
     strings.forEach((str) => {
       const msg = SlackMessage.deferMessage(this.client, str);
-      Room.messages(this).push(['hubot', `@${envelope.user.name} ${msg}`]) 
+      Room.messages(this).push(['hubot', `@${envelope.user.name} ${msg}`])
     });
   }
 
