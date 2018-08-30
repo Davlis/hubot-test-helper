@@ -50,19 +50,38 @@ class SlackMessage extends Hubot.TextMessage {
     return slackMessage;
   }
 
+  static getRawTextAndMessageObject(text) {
+    let messageObject = null;
+    let rawText = null;
+
+    if (typeof (text) === 'object') {
+      messageObject = text;
+      rawText = messageObject.text;
+    } else {
+      rawText = text;
+    }
+
+    return { rawText, messageObject };
+  }
+
+  static getObjectOrRawText(messageObject, rawText) {
+    if (messageObject) {
+      messageObject.text = rawText;
+      return messageObject;
+    }
+
+    return rawText;
+  }
+
   replaceLinks(client, text) {
     const regex = SlackMessage.MENTION_REGEX;
     regex.lastIndex = 0;
     let cursor = 0;
     let result = null;
 
-    let messageObject = null;
-    if (typeof (text) === 'object') {
-      messageObject = text;
-      text = messageObject.text;
-    }
+    const { rawText, messageObject } = SlackMessage.getRawTextAndMessageObject(text);
 
-    while (result = regex.exec(text)) {
+    while (result = regex.exec(rawText)) {
       const [m, type, link] = result;
       switch (type) {
         case '@':
@@ -84,12 +103,7 @@ class SlackMessage extends Hubot.TextMessage {
       }
     }
 
-    if (messageObject) {
-      messageObject.text = text;
-      return messageObject;
-    } else {
-      return text;
-    }
+    return SlackMessage.getObjectOrRawText(messageObject, rawText)
   }
 
   static deferMessage(client, text) {
@@ -99,20 +113,16 @@ class SlackMessage extends Hubot.TextMessage {
     let result = null;
     const parts = [];
 
-    let messageObject = null;
-    if (typeof (text) === 'object') {
-      messageObject = text;
-      text = messageObject.text;
-    }
+    const { rawText, messageObject } = SlackMessage.getRawTextAndMessageObject(text);
 
-    while (result = regex.exec(text)) {
+    while (result = regex.exec(rawText)) {
       const [m, type, link] = result;
       switch (type) {
         case '@':
-          parts.push(text.slice(cursor, result.index), SlackMessage.replaceUser(client, link));
+          parts.push(rawText.slice(cursor, result.index), SlackMessage.replaceUser(client, link));
           break;
         case '#':
-          parts.push(text.slice(cursor, result.index), '#' + link);
+          parts.push(rawText.slice(cursor, result.index), '#' + link);
           break;
         case '!':
           console.log('! link is not supported yet');
@@ -124,14 +134,9 @@ class SlackMessage extends Hubot.TextMessage {
       }
     }
 
-    parts.push(text.slice(cursor));
+    parts.push(rawText.slice(cursor));
 
-    if (messageObject) {
-      messageObject.text = parts.join('');
-      return messageObject;
-    } else {
-      return parts.join('');
-    }
+    return SlackMessage.getObjectOrRawText(messageObject, parts.join(''));
   }
 
   static replaceUser(client, id) {
