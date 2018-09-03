@@ -24,6 +24,20 @@ describe('json message text', function () {
         ['hubot', { text: 'one json for you', someNumber: 2 }]
       ]);
     });
+  });
 
+  context('user asks hubot for oher json without text field', function () {
+    beforeEach(function () {
+      return co(function* () {
+        yield this.room.user.say('alice', '@hubot send other json');
+      }.bind(this));
+    });
+
+    it('should reply to user with json', function () {
+      expect(this.room.messages).to.eql([
+        ['alice', '@hubot send other json'],
+        ['hubot', { someNumber: 2 }]
+      ]);
+    });
   });
 });

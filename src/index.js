@@ -80,6 +80,9 @@ class SlackMessage extends Hubot.TextMessage {
     let result = null;
 
     const { rawText, messageObject } = SlackMessage.getRawTextAndMessageObject(text);
+    if (!rawText) {
+      return messageObject;
+    }
 
     while (result = regex.exec(rawText)) {
       const [m, type, link] = result;
@@ -114,6 +117,9 @@ class SlackMessage extends Hubot.TextMessage {
     const parts = [];
 
     const { rawText, messageObject } = SlackMessage.getRawTextAndMessageObject(text);
+    if(!rawText) {
+      return messageObject;
+    }
 
     while (result = regex.exec(rawText)) {
       const [m, type, link] = result;
